@@ -1,0 +1,17 @@
+{
+    "name": "swoole/app",
+    "authors": [
+        {
+            "name": "can",
+            "email": "1084148587@qq.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "App\\": "app"
+        },
+        "files": [
+            "helpers.php"
+        ]
+    }
+}
