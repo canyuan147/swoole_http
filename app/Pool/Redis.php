@@ -12,11 +12,31 @@ namespace App\Pool;
 use Swoole\Database\RedisConfig;
 use Swoole\Database\RedisPool;
 
-class Redis extends PoolDb
+class Redis implements Poolinterface
 {
+    protected static $instance ;
+
+    protected $pool ;
+
+    public static function getInstance($config=[])
+    {
+        if(is_null(static::$instance)) {
+            static::$instance = new self($config);
+        }
+        return static::$instance;
+    }
+
+    public function conn(){
+        return $this->pool->get();
+    }
+
+    public function close(object $pdo){
+        return $this->pool->put($pdo);
+    }
+
     public function __construct($config)
     {
-        $this->pool[$config['type']] = new RedisPool((new RedisConfig())
+        $this->pool= new RedisPool((new RedisConfig())
             ->withHost($config['host'])
             ->withPort($config['port'])
             ->withAuth($config['password'])

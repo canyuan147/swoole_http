@@ -22,7 +22,6 @@ class DbPool
     public function __construct()
     {
         $config = config('database.mysql');
-        $this->type = $config['type'];
         $class = "\App\Pool"."\\".$config['type'];
         $this->pool = $class::getInstance($config);
 
@@ -56,12 +55,12 @@ class DbPool
         return $this;
     }
 
-    public function update(array $array):int {
+    public function update(array $array,array $where) :bool {
         $pool =$this->pool;
-        $sql =$this->arrayToSql($array,'update');
+        $sql =$this->arrayToSql($array,'update',$where);
         $wg = new WaitGroup();
         $wg->add();
-        $ret =0;
+        $ret =false;
         go(function () use($pool,$sql,&$ret,$wg){
             $mysql = $pool->conn();
             $statement = $mysql->prepare($sql);
@@ -70,22 +69,22 @@ class DbPool
             $pool->close($mysql);
             $wg->done();
         });
+
+        $wg->wait();
+        return $ret;
     }
 
     /**
      * 将数组转化为sql
      * @param $array
      * @param string $type
-     * @param array $exclude
+     * @param array $where
      * @return string
      */
-    protected  function arrayToSql($array, $type='insert', $exclude = array())
+    protected  function arrayToSql($array, $type='insert', $where = array())
     {
         $sql = '';
         if(count($array) > 0){
-            foreach ($exclude as $exkey) {
-                unset($array[$exkey]);
-            }
             if('insert' == $type){
                 $keys = array_keys($array);
                 $values = array_values($array);
@@ -96,11 +95,16 @@ class DbPool
             }else if('update' == $type){
                 $temparr = array();
                 foreach ($array as $key => $value) {
-                    $tempsql = "'$key' = '$value'";
+                    $tempsql = "$key = '$value'";
                     $temparr[] = $tempsql;
                 }
                 $sql = implode(",", $temparr);
-                $sql = sprintf("update `%s`",$this->tables).$sql;
+                foreach ($where as $k=>$v){
+                    $whsql = "$k = '$v'";
+                    $up_where[] = $whsql;
+                }
+                $up_where = implode(" and ", $up_where);
+                $sql = sprintf("update `%s`",$this->tables).' SET '.$sql." where ".$up_where;
             }
         }
         return $sql;
