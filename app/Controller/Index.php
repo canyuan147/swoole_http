@@ -8,6 +8,7 @@
 namespace App\Controller;
 
 use App\Server\Client;
+use App\Pool\RedisPool;
 
 class Index extends Base {
 
@@ -23,5 +24,14 @@ class Index extends Base {
     public function test($request, $response){
         $response->header('Content-Type', 'application/json');
         $response->end(message(array('list'=>''),'请求Index/test数据成功',100));
+    }
+
+    public function testreids($request, $response){
+         $redis = new RedisPool();
+         $redis->set('name','canyuan');
+         $name = $redis->get('name');
+         var_dump($name);
+        $response->header('Content-Type', 'application/json');
+        $response->end(message(array('list'=>''),'请求Index/testreids数据成功',100));
     }
 }

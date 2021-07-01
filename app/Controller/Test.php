@@ -20,8 +20,16 @@ class Test extends Base {
         $response->end(message(array('id'=>$res),'请求Test/index数据成功',100));
     }
 
-    public function test($request, $response){
+    public function updata($request, $response){
+        $id = $request->get['id'];
+        $db = new DbPool();
+        $res = $db->table('user')->update(['name'=>'canyuan10'],['id'=>$id]);
+        if($res){
+           $data = message(array('id'=>$id),'请求Test/updata修改数据成功',100);
+        }else{
+            $data = message(array('id'=>$id),'请求Test/updata修改数据失败',101);
+        }
         $response->header('Content-Type', 'application/json');
-        $response->end(message(array('list'=>''),'请求Test/test数据成功',100));
+        $response->end($data);
     }
 }
