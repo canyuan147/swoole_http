@@ -3,7 +3,7 @@
 return [
     'mysql'=>[
         'type'=>'Pdo',
-        'host'=>'47.107.89.22',
+        'host'=>'127.0.0.1',
         'port'=>3306,
         'coding'=>'utf8mb4',
         'dbname'=>'swoole',
